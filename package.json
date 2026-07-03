@@ -1,0 +1,12 @@
+{
+  "name": "renamer",
+  "version": "1.0.0",
+  "description": "renames all files in a folder matching a pattern with some other pattern",
+  "license": "MIT",
+  "author": "hAbuMustafa",
+  "type": "module",
+  "main": "indext.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
