@@ -1,5 +1,5 @@
 // run: nub watch ./ folder-path="d:\blu" from="(S\d+E\d+).*(x.*)" to="x1 ([title])" map="./example/bluey episodes.json"
-import { readdir, rename } from 'node:fs/promises';
+import { readdir, rename, readFile } from 'node:fs/promises';
 import path from 'path';
 
 const args = process.argv.slice(2);
@@ -29,6 +29,16 @@ const toName = options.get('to')!;
 if (toName.includes('[') && !options.get('map')) {
   console.error('Missing argument: map');
   process.exit(1);
+}
+
+if (options.has('map')) {
+  try {
+    const mapFileContent = await readFile(options.get('map')!, 'utf8');
+
+    options.set('mapObj', JSON.parse(mapFileContent));
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 async function getFileNames(dirPath: string) {
