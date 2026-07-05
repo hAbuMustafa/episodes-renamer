@@ -24,8 +24,6 @@ expectedArgs.forEach((arg) => {
 
 if (hasMissingArgs) process.exit(1);
 
-const prompt = readline.createInterface({ input, output });
-
 const folderPath = options.get('folder-path')!;
 const filterPattern = options.get('filter')!;
 const toName = options.get('to')!;
@@ -60,7 +58,6 @@ let metadataMap: Record<string, Record<string, any>> | undefined;
 
 if (toName.includes('[') && !options.get('map')) {
   console.error('Missing argument: map');
-  prompt.close();
   process.exit(1);
 }
 
@@ -71,10 +68,11 @@ if (options.has('map')) {
     metadataMap = JSON.parse(mapFileContent);
   } catch (err) {
     console.error(err);
-    prompt.close();
     process.exit(1);
   }
 }
+
+const prompt = readline.createInterface({ input, output });
 
 async function getFileNames(dirPath: string) {
   const entries = await readdir(dirPath, { withFileTypes: true });
