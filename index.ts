@@ -1,4 +1,4 @@
-// run: nub watch ./ folder-path="d:\blu" from="(S\d+E\d+).*(x.*)" to="x1 ([title])" map="./example/bluey episodes.json"
+// run: nub watch ./ folder-path="d:\blu" filter="(S\d+E\d+).*(x.*)" to="x1 ([title])" map="./example/bluey episodes.json"
 import { readdir, rename, readFile } from 'node:fs/promises';
 import path from 'path';
 
@@ -8,7 +8,7 @@ const options = new Map<string, string | undefined>();
 
 args.map((arg) => arg.split('=')).forEach(([k, v]) => options.set(k, v));
 
-const expectedArgs = ['folder-path', 'from', 'to'];
+const expectedArgs = ['folder-path', 'filter', 'to'];
 
 let hasMissingArgs = false;
 
@@ -23,7 +23,7 @@ expectedArgs.forEach((arg) => {
 if (hasMissingArgs) process.exit(1);
 
 const folderPath = options.get('folder-path')!;
-const fromName = options.get('from')!;
+const filterPattern = options.get('filter')!;
 const toName = options.get('to')!;
 
 let metadataMap: Record<string, Record<string, any>> | undefined;
@@ -59,9 +59,12 @@ async function renameFile(oldName: string, newName: string, folder = folderPath)
   }
 }
 
-const files = await getFileNames(folderPath);
+const filterRegex = new RegExp(filterPattern, 'i');
 
-const fromPattern = new RegExp(fromName, 'i');
+const files = await getFileNames(folderPath).then((fNames) =>
+  fNames.filter((nm) => filterRegex.test(nm))
+);
+
 const placeholders = /\[.*\]/g
   .exec(toName)
   ?.slice(0)
@@ -69,23 +72,25 @@ const placeholders = /\[.*\]/g
 
 files.forEach((n) => {
   const fileNameArr = n.split('.');
-  const fileExt = newExt ?? fileNameArr.pop();
+  const fileExt = fileNameArr.pop();
   const fileName = fileNameArr.join('.');
 
-  const seasonNum = /(?<=[^a-z]s)\d+/i.exec(fileName)?.[0].padStart(2, '0');
-  const episodeNum = /(?<=[^a-z]e)\d+/i
+  const seasonNum = /(?<=[^a-z]?s)\d+/i.exec(fileName)?.[0].padStart(2, '0');
+  const episodeNum = /(?<=[^a-z]?e)\d+/i
     .exec(fileName)?.[0]
     .padStart(files.length.toString().length + 1, '0');
 
   const metadata = metadataMap?.[`S${seasonNum}E${episodeNum}`];
 
-  const groups = fromPattern.exec(fileName)?.slice(1);
+  const groups = filterRegex.exec(fileName)?.slice(1);
+
+  console.log(`S${seasonNum}E${episodeNum}`);
 
   let newName = toName;
 
   if (groups?.length) {
     groups.forEach((repl, i) => {
-      newName = newName.replace(`x${i + 1}`, repl);
+      newName = newName.replace(`x${i + 1}x`, repl);
     });
   }
 
@@ -95,5 +100,5 @@ files.forEach((n) => {
   });
 
   // rename files
-  renameFile(n, [newName, fileExt].join('.'));
+  renameFile(n, [newName, newExt ?? fileExt].join('.'));
 });
