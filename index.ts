@@ -78,7 +78,7 @@ files.forEach((n) => {
   const seasonNum = /(?<=[^a-z]?s)\d+/i.exec(fileName)?.[0].padStart(2, '0');
   const episodeNum = /(?<=[^a-z]?e)\d+/i
     .exec(fileName)?.[0]
-    .padStart(files.length.toString().length + 1, '0');
+    .padStart(files.length.toString().length ?? 2, '0');
 
   const metadata = metadataMap?.[`S${seasonNum}E${episodeNum}`];
 
