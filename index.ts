@@ -26,6 +26,8 @@ const folderPath = options.get('folder-path')!;
 const fromName = options.get('from')!;
 const toName = options.get('to')!;
 
+let metadataMap: Record<string, Record<string, any>> | undefined;
+
 if (toName.includes('[') && !options.get('map')) {
   console.error('Missing argument: map');
   process.exit(1);
@@ -35,7 +37,7 @@ if (options.has('map')) {
   try {
     const mapFileContent = await readFile(options.get('map')!, 'utf8');
 
-    options.set('mapObj', JSON.parse(mapFileContent));
+    metadataMap = JSON.parse(mapFileContent);
   } catch (err) {
     console.error(err);
   }
@@ -59,11 +61,22 @@ async function renameFile(oldName: string, newName: string, folder = folderPath)
 const files = await getFileNames(folderPath);
 
 const fromPattern = new RegExp(fromName, 'i');
+const placeholders = /\[.*\]/g
+  .exec(toName)
+  ?.slice(0)
+  .map((n) => n.replace(/[\[\]]/g, ''));
 
 files.forEach((n) => {
   const fileNameArr = n.split('.');
   const fileExt = fileNameArr.pop();
   const fileName = fileNameArr.join('.');
+
+  const seasonNum = /(?<=[^a-z]s)\d+/i.exec(fileName)?.[0].padStart(2, '0');
+  const episodeNum = /(?<=[^a-z]e)\d+/i
+    .exec(fileName)?.[0]
+    .padStart(files.length.toString().length + 1, '0');
+
+  const metadata = metadataMap?.[`S${seasonNum}E${episodeNum}`];
 
   const groups = fromPattern.exec(fileName)?.slice(1);
 
@@ -75,6 +88,10 @@ files.forEach((n) => {
     });
   }
 
-  // todo: replace all prop names with their respective values
+  // replace all prop names with their respective values
+  placeholders?.forEach((p) => {
+    newName = newName.replaceAll(`[${p}]`, metadata?.[p] ?? '');
+  });
+
   // todo: rename files
 });
