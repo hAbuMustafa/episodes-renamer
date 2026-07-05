@@ -30,5 +30,5 @@ nub ./index.ts folder-path="e:\series\bluey\04" filter="(S\d+E\d+).*galaxy" to="
   ```
 
   Also, check the [example file](./example/bluey%20episodes.json).
-- `verbose` (optional, flag): if you want the app to inform you about every change processed.
-- `silent` (optional, flag): if you want the app to proceed silently with prompting you about every name change.
+- `verbose` (optional, flag): if you want the app to inform you about every change processed  (default `false`).
+- `silent` (optional, flag): if you want the app to proceed silently with prompting you about every name change (default `false`).
