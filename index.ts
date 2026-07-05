@@ -42,9 +42,15 @@ const filterFileType =
   options.get('file-type') ??
   options.get('fileType') ??
   options.get('ext');
+const newFileType =
+  options.get('new-type') ??
+  options.get('new-file-type') ??
+  options.get('new-ext') ??
+  options.get('newFileType') ??
+  options.get('newType') ??
+  options.get('newExt');
 
 let metadataMap: Record<string, Record<string, any>> | undefined;
-let newExt = options.get('new-ext');
 
 if (toName.includes('[') && !options.get('map')) {
   console.error('Missing argument: map');
@@ -142,11 +148,11 @@ for (const n of matchingFiles) {
 
   // rename files
   if (silent) {
-    renameFile(n, [newName.trim(), newExt ?? fileExt].join('.'));
+    renameFile(n, [newName.trim(), newFileType ?? fileExt].join('.'));
   } else {
     const proceed = await prompt
       .question(
-        `Rename "${RED + BOLD}${n}${RESET}" to "${GREEN + BOLD}${[newName.trim(), newExt ?? fileExt].join('.')}${RESET}"? (Y/n) `
+        `Rename "${RED + BOLD}${n}${RESET}" to "${GREEN + BOLD}${[newName.trim(), newFileType ?? fileExt].join('.')}${RESET}"? (Y/n) `
       )
       .then((answer) => answer.toLowerCase().trim());
 
@@ -154,7 +160,7 @@ for (const n of matchingFiles) {
       case '':
       case 'y':
       case 'yes':
-        renameFile(n, [newName.trim(), newExt ?? fileExt].join('.'));
+        renameFile(n, [newName.trim(), newFileType ?? fileExt].join('.'));
         renamedCount++;
 
         break;
