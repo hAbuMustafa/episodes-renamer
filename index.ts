@@ -79,7 +79,7 @@ async function renameFile(oldName: string, newName: string, folder = folderPath)
 
 const filterRegex = new RegExp(filterPattern, 'i');
 
-let allFilesCount: number;
+let allFilesCount = 0;
 
 const files = await getFileNames(folderPath).then((fNames) => {
   allFilesCount = fNames.length;
@@ -98,6 +98,8 @@ const placeholders = /\[.*\]/g
   ?.slice(0)
   .map((n) => n.replace(/[\[\]]/g, ''));
 
+let renamedCount = 0;
+
 files.forEach(async (n) => {
   const fileNameArr = n.split('.');
   const fileExt = fileNameArr.pop();
@@ -113,8 +115,6 @@ files.forEach(async (n) => {
   const groups = filterRegex.exec(fileName)?.slice(1);
 
   let newName = toName;
-
-  let renamedCount = 0;
 
   if (groups?.length) {
     groups.forEach((repl, i) => {
@@ -155,14 +155,14 @@ files.forEach(async (n) => {
         break;
     }
   }
-
-  if (verbose)
-    console.info(
-      silent ? files.length : renamedCount,
-      'file names were changed out of',
-      allFilesCount,
-      'files'
-    );
-
-  process.exit(0);
 });
+
+if (verbose)
+  console.info(
+    silent ? files.length : renamedCount,
+    'file names were changed out of',
+    allFilesCount,
+    'files'
+  );
+
+process.exit(0);
