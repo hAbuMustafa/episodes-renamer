@@ -81,13 +81,13 @@ const filterRegex = new RegExp(filterPattern, 'i');
 
 let allFilesCount = 0;
 
-const files = await getFileNames(folderPath).then((fNames) => {
+const matchingFiles = await getFileNames(folderPath).then((fNames) => {
   allFilesCount = fNames.length;
 
   return fNames.filter((nm) => filterRegex.test(nm));
 });
 
-if (!files.length) {
+if (!matchingFiles.length) {
   console.info('No files match set filter were found.');
   prompt.close();
   process.exit(0);
@@ -100,7 +100,7 @@ const placeholders = /\[.*\]/g
 
 let renamedCount = 0;
 
-files.forEach(async (n) => {
+matchingFiles.forEach(async (n) => {
   const fileNameArr = n.split('.');
   const fileExt = fileNameArr.pop();
   const fileName = fileNameArr.join('.');
@@ -108,7 +108,7 @@ files.forEach(async (n) => {
   const seasonNum = /(?<=[^a-z]?s)\d+/i.exec(fileName)?.[0].padStart(2, '0');
   const episodeNum = /(?<=[^a-z]?e)\d+/i
     .exec(fileName)?.[0]
-    .padStart(files.length.toString().length ?? 2, '0');
+    .padStart(matchingFiles.length.toString().length ?? 2, '0');
 
   const metadata = metadataMap?.[`S${seasonNum}E${episodeNum}`];
 
@@ -159,7 +159,7 @@ files.forEach(async (n) => {
 
 if (verbose)
   console.info(
-    silent ? files.length : renamedCount,
+    silent ? matchingFiles.length : renamedCount,
     'file names were changed out of',
     allFilesCount,
     'files'
