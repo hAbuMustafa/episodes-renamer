@@ -94,11 +94,13 @@ files.forEach((n) => {
     });
   }
 
+  newName = newName.replaceAll(/x\d+x/g, '');
+
   // replace all prop names with their respective values
   placeholders?.forEach((p) => {
     newName = newName.replaceAll(`[${p}]`, metadata?.[p] ?? '');
   });
 
   // rename files
-  renameFile(n, [newName, newExt ?? fileExt].join('.'));
+  renameFile(n, [newName.trim(), newExt ?? fileExt].join('.'));
 });
