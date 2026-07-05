@@ -1,4 +1,3 @@
-// run: nub watch ./ folder-path="d:\blu" filter="(S\d+E\d+).*(x.*)" to="x1 ([title])" map="./example/bluey episodes.json"
 import { readdir, rename, readFile } from 'node:fs/promises';
 import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
