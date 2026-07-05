@@ -37,6 +37,11 @@ const silent =
   options.has('no-prompts') ||
   options.has('noPrompt') ||
   options.has('noPrompts');
+const filterFileType =
+  options.get('type') ??
+  options.get('file-type') ??
+  options.get('fileType') ??
+  options.get('ext');
 
 let metadataMap: Record<string, Record<string, any>> | undefined;
 let newExt = options.get('new-ext');
@@ -61,7 +66,12 @@ if (options.has('map')) {
 
 async function getFileNames(dirPath: string) {
   const entries = await readdir(dirPath, { withFileTypes: true });
-  const fileNames = entries.filter((entry) => entry.isFile()).map((f) => f.name);
+  const fileNames = entries
+    .filter((entry) => entry.isFile())
+    .map((f) => f.name)
+    .filter((fileName) =>
+      filterFileType ? fileName.split('.').pop() === filterFileType : true
+    );
 
   return fileNames;
 }
