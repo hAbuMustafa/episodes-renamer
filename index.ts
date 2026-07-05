@@ -65,6 +65,11 @@ const files = await getFileNames(folderPath).then((fNames) =>
   fNames.filter((nm) => filterRegex.test(nm))
 );
 
+if (!files.length) {
+  console.info('No files match set filter were found.');
+  process.exit(0);
+}
+
 const placeholders = /\[.*\]/g
   .exec(toName)
   ?.slice(0)
