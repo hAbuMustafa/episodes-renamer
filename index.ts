@@ -1,4 +1,4 @@
-import { readdir, rename, readFile } from 'node:fs/promises';
+import { readdir, rename, readFile, access } from 'node:fs/promises';
 import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import path from 'path';
@@ -48,6 +48,13 @@ const newFileType =
   options.get('newFileType') ??
   options.get('newType') ??
   options.get('newExt');
+
+try {
+  await access(folderPath);
+} catch (error) {
+  console.error('Directory does NOT exist');
+  process.exit(1);
+}
 
 let metadataMap: Record<string, Record<string, any>> | undefined;
 
