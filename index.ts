@@ -148,7 +148,7 @@ for (const n of matchingFiles) {
 
   // rename files
   if (silent) {
-    renameFile(n, [newName.trim(), newFileType ?? fileExt].join('.'));
+    await renameFile(n, [newName.trim(), newFileType ?? fileExt].join('.'));
   } else {
     const proceed = await prompt
       .question(
@@ -160,7 +160,7 @@ for (const n of matchingFiles) {
       case '':
       case 'y':
       case 'yes':
-        renameFile(n, [newName.trim(), newFileType ?? fileExt].join('.'));
+        await renameFile(n, [newName.trim(), newFileType ?? fileExt].join('.'));
         renamedCount++;
 
         break;
