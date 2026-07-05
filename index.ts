@@ -1,5 +1,7 @@
 // run: nub watch ./ folder-path="d:\blu" filter="(S\d+E\d+).*(x.*)" to="x1 ([title])" map="./example/bluey episodes.json"
 import { readdir, rename, readFile } from 'node:fs/promises';
+import readline from 'node:readline/promises';
+import { stdin as input, stdout as output } from 'node:process';
 import path from 'path';
 
 const args = process.argv.slice(2);
@@ -22,16 +24,25 @@ expectedArgs.forEach((arg) => {
 
 if (hasMissingArgs) process.exit(1);
 
+const prompt = readline.createInterface({ input, output });
+
 const folderPath = options.get('folder-path')!;
 const filterPattern = options.get('filter')!;
 const toName = options.get('to')!;
 const verbose = options.has('v') || options.has('verbose');
+const silent =
+  options.has('silent') ||
+  options.has('no-prompt') ||
+  options.has('no-prompts') ||
+  options.has('noPrompt') ||
+  options.has('noPrompts');
 
 let metadataMap: Record<string, Record<string, any>> | undefined;
 let newExt = options.get('new-ext');
 
 if (toName.includes('[') && !options.get('map')) {
   console.error('Missing argument: map');
+  prompt.close();
   process.exit(1);
 }
 
@@ -42,6 +53,8 @@ if (options.has('map')) {
     metadataMap = JSON.parse(mapFileContent);
   } catch (err) {
     console.error(err);
+    prompt.close();
+    process.exit(1);
   }
 }
 
@@ -59,6 +72,8 @@ async function renameFile(oldName: string, newName: string, folder = folderPath)
     if (verbose) console.info(oldName, '==>', newName);
   } catch (err) {
     console.error(err);
+    prompt.close();
+    process.exit(1);
   }
 }
 
@@ -74,6 +89,7 @@ const files = await getFileNames(folderPath).then((fNames) => {
 
 if (!files.length) {
   console.info('No files match set filter were found.');
+  prompt.close();
   process.exit(0);
 }
 
@@ -82,7 +98,7 @@ const placeholders = /\[.*\]/g
   ?.slice(0)
   .map((n) => n.replace(/[\[\]]/g, ''));
 
-files.forEach((n) => {
+files.forEach(async (n) => {
   const fileNameArr = n.split('.');
   const fileExt = fileNameArr.pop();
   const fileName = fileNameArr.join('.');
@@ -96,9 +112,9 @@ files.forEach((n) => {
 
   const groups = filterRegex.exec(fileName)?.slice(1);
 
-  console.log(`S${seasonNum}E${episodeNum}`);
-
   let newName = toName;
+
+  let renamedCount = 0;
 
   if (groups?.length) {
     groups.forEach((repl, i) => {
@@ -114,8 +130,39 @@ files.forEach((n) => {
   });
 
   // rename files
-  renameFile(n, [newName.trim(), newExt ?? fileExt].join('.'));
+  if (silent) {
+    renameFile(n, [newName.trim(), newExt ?? fileExt].join('.'));
+  } else {
+    const proceed = await prompt
+      .question(
+        `Rename "${n}" to "${[newName.trim(), newExt ?? fileExt].join('.')}"? (Y/n) `
+      )
+      .then((answer) => answer.toLowerCase().trim());
+
+    switch (proceed) {
+      case '':
+      case 'y':
+      case 'yes':
+        renameFile(n, [newName.trim(), newExt ?? fileExt].join('.'));
+        renamedCount++;
+
+        break;
+      case 'abort':
+        console.info('Terminating batch rename.');
+        prompt.close();
+        process.exit(0);
+      default:
+        break;
+    }
+  }
 
   if (verbose)
-    console.info(files.length, 'file names were changed out of', allFilesCount, 'files');
+    console.info(
+      silent ? files.length : renamedCount,
+      'file names were changed out of',
+      allFilesCount,
+      'files'
+    );
+
+  process.exit(0);
 });
