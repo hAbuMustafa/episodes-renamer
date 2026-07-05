@@ -25,6 +25,7 @@ if (hasMissingArgs) process.exit(1);
 const folderPath = options.get('folder-path')!;
 const filterPattern = options.get('filter')!;
 const toName = options.get('to')!;
+const verbose = options.has('v') || options.has('verbose');
 
 let metadataMap: Record<string, Record<string, any>> | undefined;
 let newExt = options.get('new-ext');
@@ -54,6 +55,8 @@ async function getFileNames(dirPath: string) {
 async function renameFile(oldName: string, newName: string, folder = folderPath) {
   try {
     await rename(path.join(folder, oldName), path.join(folder, newName));
+
+    if (verbose) console.info(oldName, '==>', newName);
   } catch (err) {
     console.error(err);
   }
@@ -61,9 +64,13 @@ async function renameFile(oldName: string, newName: string, folder = folderPath)
 
 const filterRegex = new RegExp(filterPattern, 'i');
 
-const files = await getFileNames(folderPath).then((fNames) =>
-  fNames.filter((nm) => filterRegex.test(nm))
-);
+let allFilesCount: number;
+
+const files = await getFileNames(folderPath).then((fNames) => {
+  allFilesCount = fNames.length;
+
+  return fNames.filter((nm) => filterRegex.test(nm));
+});
 
 if (!files.length) {
   console.info('No files match set filter were found.');
@@ -108,4 +115,7 @@ files.forEach((n) => {
 
   // rename files
   renameFile(n, [newName.trim(), newExt ?? fileExt].join('.'));
+
+  if (verbose)
+    console.info(files.length, 'file names were changed out of', allFilesCount, 'files');
 });
