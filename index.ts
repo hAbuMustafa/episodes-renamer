@@ -100,7 +100,7 @@ const placeholders = /\[.*\]/g
 
 let renamedCount = 0;
 
-matchingFiles.forEach(async (n) => {
+for (const n of matchingFiles) {
   const fileNameArr = n.split('.');
   const fileExt = fileNameArr.pop();
   const fileName = fileNameArr.join('.');
@@ -155,7 +155,7 @@ matchingFiles.forEach(async (n) => {
         break;
     }
   }
-});
+}
 
 if (verbose)
   console.info(
