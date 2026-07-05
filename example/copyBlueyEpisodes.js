@@ -6,7 +6,7 @@ function copyBlueyEpisodes() {
   document.querySelectorAll('tr:has(td:nth-of-type(6))').forEach((node) => {
     const overallEpNum = Number(node.querySelector('th').textContent);
     const s = String(Math.ceil(overallEpNum / 52)).padStart(2, '0');
-    const e = String(overallEpNum % 52).padStart(2, '0');
+    const e = String(overallEpNum % 52 ?? 52).padStart(2, '0');
 
     episodes[`S${s}E${e}`] = {
       title: node.querySelector('td:nth-of-type(2)').textContent.replaceAll('"', ''),
