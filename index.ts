@@ -27,6 +27,7 @@ const fromName = options.get('from')!;
 const toName = options.get('to')!;
 
 let metadataMap: Record<string, Record<string, any>> | undefined;
+let newExt = options.get('new-ext');
 
 if (toName.includes('[') && !options.get('map')) {
   console.error('Missing argument: map');
@@ -68,7 +69,7 @@ const placeholders = /\[.*\]/g
 
 files.forEach((n) => {
   const fileNameArr = n.split('.');
-  const fileExt = fileNameArr.pop();
+  const fileExt = newExt ?? fileNameArr.pop();
   const fileName = fileNameArr.join('.');
 
   const seasonNum = /(?<=[^a-z]s)\d+/i.exec(fileName)?.[0].padStart(2, '0');
