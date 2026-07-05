@@ -119,7 +119,7 @@ for (const n of matchingFiles) {
 
   if (groups?.length) {
     groups.forEach((repl, i) => {
-      newName = newName.replace(`x${i + 1}x`, repl);
+      newName = newName.replaceAll(`x${i + 1}x`, repl);
     });
   }
 
