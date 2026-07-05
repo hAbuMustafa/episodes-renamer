@@ -93,5 +93,6 @@ files.forEach((n) => {
     newName = newName.replaceAll(`[${p}]`, metadata?.[p] ?? '');
   });
 
-  // todo: rename files
+  // rename files
+  renameFile(n, [newName, fileExt].join('.'));
 });
