@@ -3,6 +3,7 @@ import { readdir, rename, readFile } from 'node:fs/promises';
 import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import path from 'path';
+import { BOLD, GREEN, RED, RESET } from './outputANSITokens';
 
 const args = process.argv.slice(2);
 
@@ -135,7 +136,7 @@ for (const n of matchingFiles) {
   } else {
     const proceed = await prompt
       .question(
-        `Rename "${n}" to "${[newName.trim(), newExt ?? fileExt].join('.')}"? (Y/n) `
+        `Rename "${RED + BOLD}${n}${RESET}" to "${GREEN + BOLD}${[newName.trim(), newExt ?? fileExt].join('.')}${RESET}"? (Y/n) `
       )
       .then((answer) => answer.toLowerCase().trim());
 
